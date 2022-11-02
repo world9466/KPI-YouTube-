@@ -123,10 +123,6 @@ def table_combine(channel):
     table_data = pd.DataFrame(table_data)
     global KPI_table
     KPI_table = pd.concat([KPI_table,table_data],ignore_index=True)
-    
-
-
-
 
 
 
@@ -152,6 +148,6 @@ KPI_table = pd.DataFrame(KPI_table)
 for ch in channel:
     file_extract(ch)
     table_combine(ch)
-KPI_table.to_csv('../test.csv',encoding='utf-8-sig')
+KPI_table.to_csv('../channel_KPI.csv',encoding='utf-8-sig')
 
 print(KPI_table)
