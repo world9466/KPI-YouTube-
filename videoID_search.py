@@ -15,85 +15,43 @@ video_data['video_id'].str.strip()
 video_data = video_data.sort_values('time_published',ascending=True)
 
 
-
 ##################################################################################
 
-# 取出大新聞大爆卦的資料
-video_bignews_id = video_data[['video_id','time_published']][video_data['video_title'].str.contains('【大新聞大爆卦.*?')]
-
-# 建立新表格，把搜尋出的資料貼上去(重置index用)
-bignews_table = {'影片ID(平日爆卦)':[],'發布時間(平日爆卦)':[]}
-bignews_table = pd.DataFrame(bignews_table)
-
-# 沒有發布的影片，發布時間會是空白，有發布時間的資料都會是20開頭，只取有發布的影片
-for video in video_bignews_id.values:
-    if re.match('20.*',str(video[1])):
-        table = {'影片ID(平日爆卦)':[video[0]],'發布時間(平日爆卦)':[video[1]]}
-        table = pd.DataFrame(table)
-        bignews_table = pd.concat([bignews_table,table],ignore_index=True)
-
-# 加入影片數量欄位
-mount_table = {'影片數':[len(bignews_table['影片ID(平日爆卦)'])]}
-mount_table = pd.DataFrame(mount_table)
-bignews_table = bignews_table.join(mount_table,how = 'outer',rsuffix = 'x')
-bignews_table.index = bignews_table.index+1
-
-##################################################################################
-
-# 取出週末大爆卦的資料
-video_weekend_id = video_data[['video_id','time_published']][video_data['video_title'].str.contains('【週末大爆卦.*?')]
-
-weekend_table = {'影片ID(週末爆卦)':[],'發布時間(週末爆卦)':[]}
-weekend_table = pd.DataFrame(weekend_table)
-
-for video in video_weekend_id.values:
-    if re.match('20.*',str(video[1])):
-        table = {'影片ID(週末爆卦)':[video[0]],'發布時間(週末爆卦)':[video[1]]}
-        table = pd.DataFrame(table)
-        weekend_table = pd.concat([weekend_table,table],ignore_index=True)
-
-# 加入影片數量欄位
-mount_table = {'影片數':[len(weekend_table['影片ID(週末爆卦)'])]}
-mount_table = pd.DataFrame(mount_table)
-weekend_table = weekend_table.join(mount_table,how = 'outer',rsuffix = 'x')
-weekend_table.index = weekend_table.index+1
-
-##################################################################################
-
-# 取出頭條開講的資料，str.contains使用 | 符號可以選取多個關鍵字
-video_headline_id = video_data[['video_id','time_published']][video_data['video_title'].str.contains('【頭條開講.*?|專家來開講.*?')]
-
-headline_table = {'影片ID(頭條開講)':[],'發布時間(頭條開講)':[]}
-headline_table = pd.DataFrame(headline_table)
-
-for video in video_headline_id.values:
-    if re.match('20.*',str(video[1])):
-        table = {'影片ID(頭條開講)':[video[0]],'發布時間(頭條開講)':[video[1]]}
-        table = pd.DataFrame(table)
-        headline_table = pd.concat([headline_table,table],ignore_index=True)
-
-# 加入影片數量欄位
-mount_table = {'影片數':[len(headline_table['影片ID(頭條開講)'])]}
-mount_table = pd.DataFrame(mount_table)
-headline_table = headline_table.join(mount_table,how = 'outer',rsuffix = 'x')
-headline_table.index = headline_table.index+1
-
-##################################################################################
-
-
-program_lsit = ['辣晚報','前進戰略高地','國際直球對決','論文門開箱','熱搜發燒榜','頭條點新聞',
-'世界越來越盧','鄭妹看世界','真心話大冒險','螃蟹秀開鍘','琴謙天下事','新聞千里馬','洪流洞見',
-'小麥的健康筆記','詩瑋愛健康','金牌特派','阿比妹妹','食安趨勢報告','民間特偵組','全球政經周報',
-'中天車享家','老Z調查線','詭案橞客室','靈異錯別字','宏色禁區','獸身男女','窩星球','愛吃星球',
-'流行星球','小豪出任務','政治新人榜','綠也掀桌','你的豪朋友']
+# 建立節目清單， .*? 是用在str.contains()的判別上
+program_lsit = ['【大新聞大爆卦.*?','【週末大爆卦.*?','【頭條開講.*?|專家來開講.*?',
+'.*?辣晚報.*?','.*?前進戰略高地.*?','.*?國際直球對決.*?','.*?論文門開箱.*?',
+'.*?熱搜發燒榜.*?','.*?頭條點新聞.*?','.*?世界越來越盧.*?','.*?鄭妹看世界.*?',
+'.*?真心話大冒險.*?','.*?螃蟹秀開鍘.*?','.*?琴謙天下事.*?','.*?新聞千里馬.*?',
+'.*?洪流洞見.*?','.*?小麥的健康筆記.*?','.*?詩瑋愛健康.*?','.*?金牌特派.*?',
+'.*?阿比妹妹.*?','.*?食安趨勢報告.*?','.*?民間特偵組.*?','.*?全球政經周報.*?',
+'.*?中天車享家.*?','.*?老Z調查線.*?','.*?詭案橞客室.*?',
+'.*?靈異錯別字.*?|.*?鬼錯字.*?','.*?宏色禁區.*?|.*?宏色封鎖線.*?','.*?獸身男女.*?',
+'.*?窩星球.*?','.*?愛吃星球.*?','.*?流行星球.*?','.*?小豪出任務.*?',
+'.*?政治新人榜.*?','.*?綠也掀桌.*?','.*?你的豪朋友.*?']
 
 # 使用關鍵字搜尋節目
 def video_id_search(program):
-    video_data_id = video_data[['video_id','time_published']][video_data['video_title'].str.contains('.*?{}.*?'.format(program))]
+    video_data_id = video_data[['video_id','time_published']][video_data['video_title'].str.contains('{}'.format(program))]
 
+    # 把正則用的.*?去掉，把多餘的字移除
+    if '大新聞大爆卦' in program:
+        program = '平日爆卦'
+    elif '週末大爆卦' in program:
+        program = '週末爆卦'
+    elif '頭條開講' in program:
+        program = '頭條開講'
+    elif '靈異錯別字' in program:
+        program = '靈異錯別字'
+    elif '宏色禁區' in program:
+        program = '宏色禁區'
+    else:
+        program = re.sub('[.\*\?]','',program)
+
+    # 建立新表格，把搜尋出的資料貼上去(重置index用)
     data_table = {'影片ID({})'.format(program):[],'發布時間({})'.format(program):[]}
     data_table = pd.DataFrame(data_table)
 
+    # 沒有發布的影片，發布時間會是空白，有發布時間的資料都會是20開頭，只取有發布的影片
     for video in video_data_id.values:
         if re.match('20.*',str(video[1])):
             table = {'影片ID({})'.format(program):[video[0]],'發布時間({})'.format(program):[video[1]]}
@@ -112,8 +70,8 @@ def video_id_search(program):
 
 ##################################################################################
 
-id_table = bignews_table.join(weekend_table,how = 'outer',rsuffix = 'x')
-id_table = id_table.join(headline_table,how = 'outer',rsuffix = 'xx')
+id_table = pd.DataFrame()
+
 
 # 搜尋每個節目，把表格合併到 id_table
 for program in program_lsit:
