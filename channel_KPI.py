@@ -53,7 +53,7 @@ def table_combine(channel):
         '日期':table1['Date'],
         '總觀看次數':table1['Views'],
         '總觀看時長(小時)':table1['Watch time (hours)'],
-        '平均觀看時間比例':table1['Average percentage viewed (%)'],
+        '平均觀看比例':table1['Average percentage viewed (%)'],
         '不重複觀眾人數':table1['Unique viewers'],
         '新訪客佔比':table3['新訪客佔比'],
         '頻道營收(美金)':table1['Your estimated revenue (USD)']
@@ -70,17 +70,17 @@ def table_combine(channel):
     time_high = round(table['總觀看時長(小時)'].quantile(q=0.75,interpolation='linear'))
     time_low = round(table['總觀看時長(小時)'].quantile(q=0.25,interpolation='linear'))
 
-    # 平均觀看時間比例取四分位數為指標
-    dur_max = round(table['平均觀看時間比例'].max(),1)/100
-    dur_high = round(table['平均觀看時間比例'].quantile(q=0.75,interpolation='linear'),1)/100
-    dur_low = round(table['平均觀看時間比例'].quantile(q=0.25,interpolation='linear'),1)/100
+    # 平均觀看比例取四分位數為指標
+    dur_max = round(table['平均觀看比例'].max(),1)/100
+    dur_high = round(table['平均觀看比例'].quantile(q=0.75,interpolation='linear'),1)/100
+    dur_low = round(table['平均觀看比例'].quantile(q=0.25,interpolation='linear'),1)/100
 
     # 不重複觀眾人數
     uv_max = table['不重複觀眾人數'].max()
     uv_high = round(table['不重複觀眾人數'].quantile(q=0.75,interpolation='linear'))
     uv_low = round(table['不重複觀眾人數'].quantile(q=0.25,interpolation='linear'))
 
-    # 新訪客佔比
+    # 新訪客佔比，如果有值的話就計算，沒值的話就填NaN上去
     if  isinstance(table['新訪客佔比'][1], float):
         newaud_max = table['新訪客佔比'].max()
         newaud_high = table['新訪客佔比'].quantile(q=0.75,interpolation='linear')
@@ -115,7 +115,7 @@ def table_combine(channel):
         '頻道':[channel],
         '總觀看次數_頂標':[views_max],'總觀看次數_高標':[views_high],'總觀看次數_低標':[views_low],
         '總觀看時長(小時)_頂標':[time_max],'總觀看時長(小時)_高標':[time_high],'總觀看時長(小時)_底標':[time_low],
-        '平均觀看時間比例_頂標':[dur_max],'平均觀看時間比例_高標':[dur_high],'平均觀看時間比例_低標':[dur_low],
+        '平均觀看比例_頂標':[dur_max],'平均觀看比例_高標':[dur_high],'平均觀看比例_低標':[dur_low],
         '不重複觀眾人數_頂標':[uv_max],'不重複觀眾人數_高標':[uv_high],'不重複觀眾人數_低標':[uv_low],
         '新訪客佔比_頂標':[newaud_max],'新訪客佔比_高標':[newaud_high],'新訪客佔比_低標':[newaud_low],
         '頻道營收(美金)_頂標':[revenue_max],'頻道營收(美金)_高標':[revenue_high],'頻道營收(美金)_低標':[revenue_low]
@@ -137,7 +137,7 @@ KPI_table = {
     '頻道':[],    
     '總觀看次數_頂標':[],'總觀看次數_高標':[],'總觀看次數_低標':[],
     '總觀看時長(小時)_頂標':[],'總觀看時長(小時)_高標':[],'總觀看時長(小時)_底標':[],
-    '平均觀看時間比例_頂標':[],'平均觀看時間比例_高標':[],'平均觀看時間比例_低標':[],
+    '平均觀看比例_頂標':[],'平均觀看比例_高標':[],'平均觀看比例_低標':[],
     '不重複觀眾人數_頂標':[],'不重複觀眾人數_高標':[],'不重複觀眾人數_低標':[],
     '新訪客佔比_頂標':[],'新訪客佔比_高標':[],'新訪客佔比_低標':[],
     '頻道營收(美金)_頂標':[],'頻道營收(美金)_高標':[],'頻道營收(美金)_低標':[]
@@ -148,6 +148,6 @@ KPI_table = pd.DataFrame(KPI_table)
 for ch in channel:
     file_extract(ch)
     table_combine(ch)
-KPI_table.to_csv('../channel_KPI.csv',encoding='utf-8-sig')
+KPI_table.to_excel('../channel_KPI.xlsx',encoding='utf-8-sig')
 
 print(KPI_table)
