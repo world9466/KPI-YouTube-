@@ -8,7 +8,7 @@ def file_extract(program):
     dirpath = '../program/{}/壓縮檔'.format(program)
     files = os.listdir(dirpath)
     for file in files:
-        # 建立資料夾名稱，取出壓縮檔的數字，其他都去除
+        # 建立資料夾名稱，取出壓縮檔名字內的數字，其他都去除
         folder_name = re.findall('\(.*\)',file)
         folder_name = folder_name[0]               
         folder_name = re.sub('[\(\)]','',folder_name)
@@ -25,7 +25,7 @@ def file_extract(program):
 def table_combine(program):
     # 先將各影片group的值合併，每500部影片會有一個資料夾，每個節目的資料夾總數不同
     # 資料夾命名從0到50，迭代讀取只要資料夾內有Table data.csv檔案就進行讀取
-    # 要最先迭代月份，順序是讀取完每個資料夾的單月去做總計
+    # 要最先迭代月份，順序是先讀取完每個資料夾的單月去做總計，然後就能依序做出每個月的統計
 
     views_count = 0
     watchtime_count = 0
@@ -74,25 +74,25 @@ def table_combine(program):
     table.index = table.index+1
     
     #print(table)
-    # 觀看次數取四分位數為指標
-    views_max = table['總觀看次數'].max()
-    views_high = round(table['總觀看次數'].quantile(q=0.75,interpolation='linear'))
-    views_low = round(table['總觀看次數'].quantile(q=0.25,interpolation='linear'))
+    # 觀看次數取四分位數為指標，有的月份頻道還沒上線
+    views_max = table['總觀看次數'][table['總觀看次數'] != 0 ].max()
+    views_high = round(table['總觀看次數'][table['總觀看次數'] != 0 ].quantile(q=0.75,interpolation='linear'))
+    views_low = round(table['總觀看次數'][table['總觀看次數'] != 0 ].quantile(q=0.25,interpolation='linear'))
     
     # 觀看時長取四分位數為指標
-    time_max = round(table['總觀看時長(小時)'].max())
-    time_high = round(table['總觀看時長(小時)'].quantile(q=0.75,interpolation='linear'))
-    time_low = round(table['總觀看時長(小時)'].quantile(q=0.25,interpolation='linear'))
+    time_max = round(table['總觀看時長(小時)'][table['總觀看時長(小時)'] != 0 ].max())
+    time_high = round(table['總觀看時長(小時)'][table['總觀看時長(小時)'] != 0 ].quantile(q=0.75,interpolation='linear'))
+    time_low = round(table['總觀看時長(小時)'][table['總觀看時長(小時)'] != 0 ].quantile(q=0.25,interpolation='linear'))
 
     # 平均觀看比例取四分位數為指標
-    dur_max = round(table['平均觀看比例'].max(),1)/100
-    dur_high = round(table['平均觀看比例'].quantile(q=0.75,interpolation='linear'),1)/100
-    dur_low = round(table['平均觀看比例'].quantile(q=0.25,interpolation='linear'),1)/100
+    dur_max = round(table['平均觀看比例'][table['平均觀看比例'] != 0 ].max(),1)/100
+    dur_high = round(table['平均觀看比例'][table['平均觀看比例'] != 0 ].quantile(q=0.75,interpolation='linear'),1)/100
+    dur_low = round(table['平均觀看比例'][table['平均觀看比例'] != 0 ].quantile(q=0.25,interpolation='linear'),1)/100
 
     #營收
-    revenue_max = round(table['頻道營收(美金)'].max())
-    revenue_high = round(table['頻道營收(美金)'].quantile(q=0.75,interpolation='linear'))
-    revenue_low = round(table['頻道營收(美金)'].quantile(q=0.25,interpolation='linear'))
+    revenue_max = round(table['頻道營收(美金)'][table['頻道營收(美金)'] != 0 ].max())
+    revenue_high = round(table['頻道營收(美金)'][table['頻道營收(美金)'] != 0 ].quantile(q=0.75,interpolation='linear'))
+    revenue_low = round(table['頻道營收(美金)'][table['頻道營收(美金)'] != 0 ].quantile(q=0.25,interpolation='linear'))
     table_data_2 = {
         '節目':[program],    
         '總觀看次數_頂標':[views_max],'總觀看次數_高標':[views_high],'總觀看次數_低標':[views_low],
