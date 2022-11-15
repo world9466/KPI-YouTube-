@@ -77,28 +77,33 @@ def table_combine(program):
     # 觀看次數取四分位數為指標，有的月份頻道還沒上線
     views_max = table['總觀看次數'][table['總觀看次數'] != 0 ].max()
     views_high = round(table['總觀看次數'][table['總觀看次數'] != 0 ].quantile(q=0.75,interpolation='linear'))
+    views_med = round(table['總觀看次數'][table['總觀看次數'] != 0 ].quantile(q=0.5,interpolation='linear'))
     views_low = round(table['總觀看次數'][table['總觀看次數'] != 0 ].quantile(q=0.25,interpolation='linear'))
     
     # 觀看時長取四分位數為指標
     time_max = round(table['總觀看時長(小時)'][table['總觀看時長(小時)'] != 0 ].max())
     time_high = round(table['總觀看時長(小時)'][table['總觀看時長(小時)'] != 0 ].quantile(q=0.75,interpolation='linear'))
+    time_med = round(table['總觀看時長(小時)'][table['總觀看時長(小時)'] != 0 ].quantile(q=0.5,interpolation='linear'))
     time_low = round(table['總觀看時長(小時)'][table['總觀看時長(小時)'] != 0 ].quantile(q=0.25,interpolation='linear'))
 
     # 平均觀看比例取四分位數為指標
     dur_max = round(table['平均觀看比例'][table['平均觀看比例'] != 0 ].max(),1)/100
     dur_high = round(table['平均觀看比例'][table['平均觀看比例'] != 0 ].quantile(q=0.75,interpolation='linear'),1)/100
+    dur_med = round(table['平均觀看比例'][table['平均觀看比例'] != 0 ].quantile(q=0.5,interpolation='linear'),1)/100
     dur_low = round(table['平均觀看比例'][table['平均觀看比例'] != 0 ].quantile(q=0.25,interpolation='linear'),1)/100
 
     #營收
     revenue_max = round(table['頻道營收(美金)'][table['頻道營收(美金)'] != 0 ].max())
     revenue_high = round(table['頻道營收(美金)'][table['頻道營收(美金)'] != 0 ].quantile(q=0.75,interpolation='linear'))
+    revenue_med = round(table['頻道營收(美金)'][table['頻道營收(美金)'] != 0 ].quantile(q=0.5,interpolation='linear'))
     revenue_low = round(table['頻道營收(美金)'][table['頻道營收(美金)'] != 0 ].quantile(q=0.25,interpolation='linear'))
+
     table_data_2 = {
         '節目':[program],    
-        '總觀看次數_頂標':[views_max],'總觀看次數_高標':[views_high],'總觀看次數_低標':[views_low],
-        '總觀看時長(小時)_頂標':[time_max],'總觀看時長(小時)_高標':[time_high],'總觀看時長(小時)_底標':[time_low],
-        '平均觀看比例_頂標':[dur_max],'平均觀看比例_高標':[dur_high],'平均觀看比例_低標':[dur_low],
-        '頻道營收(美金)_頂標':[revenue_max],'頻道營收(美金)_高標':[revenue_high],'頻道營收(美金)_低標':[revenue_low]
+        '總觀看次數_頂標':[views_max],'總觀看次數_高標':[views_high],'總觀看次數_中位數':[views_med],'總觀看次數_低標':[views_low],
+        '總觀看時長(小時)_頂標':[time_max],'總觀看時長(小時)_高標':[time_high],'總觀看時長(小時)_中位數':[time_med],'總觀看時長(小時)_底標':[time_low],
+        '平均觀看比例_頂標':[dur_max],'平均觀看比例_高標':[dur_high],'平均觀看比例_中位數':[dur_med],'平均觀看比例_低標':[dur_low],
+        '頻道營收(美金)_頂標':[revenue_max],'頻道營收(美金)_高標':[revenue_high],'頻道營收(美金)_中位數':[revenue_med],'頻道營收(美金)_低標':[revenue_low],
         }
     table_data_2 = pd.DataFrame(table_data_2)
     global KPI_table
@@ -108,10 +113,10 @@ def table_combine(program):
 
 KPI_table = {
     '節目':[],    
-    '總觀看次數_頂標':[],'總觀看次數_高標':[],'總觀看次數_低標':[],
-    '總觀看時長(小時)_頂標':[],'總觀看時長(小時)_高標':[],'總觀看時長(小時)_底標':[],
-    '平均觀看比例_頂標':[],'平均觀看比例_高標':[],'平均觀看比例_低標':[],
-    '頻道營收(美金)_頂標':[],'頻道營收(美金)_高標':[],'頻道營收(美金)_低標':[]
+    '總觀看次數_頂標':[],'總觀看次數_高標':[],'總觀看次數_中位數':[],'總觀看次數_低標':[],
+    '總觀看時長(小時)_頂標':[],'總觀看時長(小時)_高標':[],'總觀看時長(小時)_中位數':[],'總觀看時長(小時)_底標':[],
+    '平均觀看比例_頂標':[],'平均觀看比例_高標':[],'平均觀看比例_中位數':[],'平均觀看比例_低標':[],
+    '頻道營收(美金)_頂標':[],'頻道營收(美金)_高標':[],'頻道營收(美金)_中位數':[],'頻道營收(美金)_低標':[],
     }
 KPI_table = pd.DataFrame(KPI_table)
 

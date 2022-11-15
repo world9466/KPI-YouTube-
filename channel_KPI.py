@@ -24,14 +24,14 @@ def file_extract(channel):
 
 # 讀取csv檔，輸出表格
 def table_combine(channel):
-    # 處理第一個表格
+    # 處理第一個表格(大部分的觀看資料)
     table1 = pd.read_csv('../channel/{}/view_revenue_data/Table data.csv'.format(channel),encoding='utf8')
     table1 = table1.tail(-1)                                 # 不顯示總計
     table1 = table1.sort_values(['Date'],ascending=True)     # 用日期排列
     table1 = table1.reset_index()                            # 重設index
     table1.index = table1.index+1                            # 讓inedx從1開始
 
-    # 處理第二個表格，整理成table3
+    # 處理第二個表格(新觀眾數據)，整理成table3
     table2_folder_path = "../channel/{}/audience_data".format(channel)
     if os.path.isdir(table2_folder_path):
         table2 = pd.read_csv('../channel/{}/audience_data/表格資料.csv'.format(channel),encoding='utf8')
@@ -48,7 +48,7 @@ def table_combine(channel):
         table3.index = table3.index+1
 
 
-    # 選取所需欄位，建立新table
+    # 選取所需欄位，建立一個完整 table (只有新訪客須從table3讀取)
     table = {
         '日期':table1['Date'],
         '總觀看次數':table1['Views'],
@@ -61,43 +61,52 @@ def table_combine(channel):
     table = pd.DataFrame(table)
 
     # 觀看次數取四分位數為指標
-    views_max = table['總觀看次數'].max()
-    views_high = round(table['總觀看次數'].quantile(q=0.75,interpolation='linear'))
-    views_low = round(table['總觀看次數'].quantile(q=0.25,interpolation='linear'))
+    views_max = table['總觀看次數'][table['總觀看次數'] != 0 ].max()
+    views_high = round(table['總觀看次數'][table['總觀看次數'] != 0 ].quantile(q=0.75,interpolation='linear'))
+    views_med = round(table['總觀看次數'][table['總觀看次數'] != 0 ].quantile(q=0.5,interpolation='linear'))
+    views_low = round(table['總觀看次數'][table['總觀看次數'] != 0 ].quantile(q=0.25,interpolation='linear'))
     
     # 觀看時長取四分位數為指標
-    time_max = round(table['總觀看時長(小時)'].max())
-    time_high = round(table['總觀看時長(小時)'].quantile(q=0.75,interpolation='linear'))
-    time_low = round(table['總觀看時長(小時)'].quantile(q=0.25,interpolation='linear'))
+    time_max = round(table['總觀看時長(小時)'][table['總觀看時長(小時)'] != 0 ].max())
+    time_high = round(table['總觀看時長(小時)'][table['總觀看時長(小時)'] != 0 ].quantile(q=0.75,interpolation='linear'))
+    time_med = round(table['總觀看時長(小時)'][table['總觀看時長(小時)'] != 0 ].quantile(q=0.5,interpolation='linear'))
+    time_low = round(table['總觀看時長(小時)'][table['總觀看時長(小時)'] != 0 ].quantile(q=0.25,interpolation='linear'))
 
     # 平均觀看比例取四分位數為指標
-    dur_max = round(table['平均觀看比例'].max(),1)/100
-    dur_high = round(table['平均觀看比例'].quantile(q=0.75,interpolation='linear'),1)/100
-    dur_low = round(table['平均觀看比例'].quantile(q=0.25,interpolation='linear'),1)/100
+    dur_max = round(table['平均觀看比例'][table['平均觀看比例'] != 0 ].max(),1)/100
+    dur_high = round(table['平均觀看比例'][table['平均觀看比例'] != 0 ].quantile(q=0.75,interpolation='linear'),1)/100
+    dur_med = round(table['平均觀看比例'][table['平均觀看比例'] != 0 ].quantile(q=0.5,interpolation='linear'),1)/100
+    dur_low = round(table['平均觀看比例'][table['平均觀看比例'] != 0 ].quantile(q=0.25,interpolation='linear'),1)/100
 
     # 不重複觀眾人數
-    uv_max = table['不重複觀眾人數'].max()
-    uv_high = round(table['不重複觀眾人數'].quantile(q=0.75,interpolation='linear'))
-    uv_low = round(table['不重複觀眾人數'].quantile(q=0.25,interpolation='linear'))
+    uv_max = table['不重複觀眾人數'][table['不重複觀眾人數'] != 0 ].max()
+    uv_high = round(table['不重複觀眾人數'][table['不重複觀眾人數'] != 0 ].quantile(q=0.75,interpolation='linear'))
+    uv_med = round(table['不重複觀眾人數'][table['不重複觀眾人數'] != 0 ].quantile(q=0.5,interpolation='linear'))
+    uv_low = round(table['不重複觀眾人數'][table['不重複觀眾人數'] != 0 ].quantile(q=0.25,interpolation='linear'))
 
-    # 新訪客佔比，如果有值的話就計算，沒值的話就填NaN上去
+    # 新訪客佔比，如果有值的話就計算(不知道數字整數會不會變成int格式，故多加判斷式)，沒值的話就填NaN上去
+    # 因為有些頻道沒有權限，無法從個別頻道工作室查詢到資料
     if  isinstance(table['新訪客佔比'][1], float):
-        newaud_max = table['新訪客佔比'].max()
-        newaud_high = table['新訪客佔比'].quantile(q=0.75,interpolation='linear')
-        newaud_low = table['新訪客佔比'].quantile(q=0.25,interpolation='linear')
+        newaud_max = table['新訪客佔比'][table['新訪客佔比'] != 0 ].max()
+        newaud_high = table['新訪客佔比'][table['新訪客佔比'] != 0 ].quantile(q=0.75,interpolation='linear')
+        newaud_med = table['新訪客佔比'][table['新訪客佔比'] != 0 ].quantile(q=0.5,interpolation='linear')
+        newaud_low = table['新訪客佔比'][table['新訪客佔比'] != 0 ].quantile(q=0.25,interpolation='linear')
     elif  isinstance(table['新訪客佔比'][1], int):
-        newaud_max = table['新訪客佔比'].max()
-        newaud_high = table['新訪客佔比'].quantile(q=0.75,interpolation='linear')
-        newaud_low = table['新訪客佔比'].quantile(q=0.25,interpolation='linear')
+        newaud_max = table['新訪客佔比'][table['新訪客佔比'] != 0 ].max()
+        newaud_high = table['新訪客佔比'][table['新訪客佔比'] != 0 ].quantile(q=0.75,interpolation='linear')
+        newaud_med = table['新訪客佔比'][table['新訪客佔比'] != 0 ].quantile(q=0.5,interpolation='linear')
+        newaud_low = table['新訪客佔比'][table['新訪客佔比'] != 0 ].quantile(q=0.25,interpolation='linear')
     else:
         newaud_max = 'NaN'
         newaud_high = 'NaN'
+        newaud_med = 'NaN'
         newaud_low = 'NaN'
 
     #營收
-    revenue_max = round(table['頻道營收(美金)'].max())
-    revenue_high = round(table['頻道營收(美金)'].quantile(q=0.75,interpolation='linear'))
-    revenue_low = round(table['頻道營收(美金)'].quantile(q=0.25,interpolation='linear'))
+    revenue_max = round(table['頻道營收(美金)'][table['頻道營收(美金)'] != 0 ].max())
+    revenue_high = round(table['頻道營收(美金)'][table['頻道營收(美金)'] != 0 ].quantile(q=0.75,interpolation='linear'))
+    revenue_med = round(table['頻道營收(美金)'][table['頻道營收(美金)'] != 0 ].quantile(q=0.5,interpolation='linear'))
+    revenue_low = round(table['頻道營收(美金)'][table['頻道營收(美金)'] != 0 ].quantile(q=0.25,interpolation='linear'))
 
     # q 默認為0.5(中位數)，第一四分位數為0.25，第三四分位數為0.75
     # axis ： 0為index，1為columns (只能用在Dataframe)
@@ -113,12 +122,12 @@ def table_combine(channel):
 
     table_data = {
         '頻道':[channel],
-        '總觀看次數_頂標':[views_max],'總觀看次數_高標':[views_high],'總觀看次數_低標':[views_low],
-        '總觀看時長(小時)_頂標':[time_max],'總觀看時長(小時)_高標':[time_high],'總觀看時長(小時)_底標':[time_low],
-        '平均觀看比例_頂標':[dur_max],'平均觀看比例_高標':[dur_high],'平均觀看比例_低標':[dur_low],
-        '不重複觀眾人數_頂標':[uv_max],'不重複觀眾人數_高標':[uv_high],'不重複觀眾人數_低標':[uv_low],
-        '新訪客佔比_頂標':[newaud_max],'新訪客佔比_高標':[newaud_high],'新訪客佔比_低標':[newaud_low],
-        '頻道營收(美金)_頂標':[revenue_max],'頻道營收(美金)_高標':[revenue_high],'頻道營收(美金)_低標':[revenue_low]
+        '總觀看次數_頂標':[views_max],'總觀看次數_高標':[views_high],'總觀看次數_中位數':[views_med],'總觀看次數_低標':[views_low],
+        '總觀看時長(小時)_頂標':[time_max],'總觀看時長(小時)_高標':[time_high],'總觀看時長(小時)_中位數':[time_med],'總觀看時長(小時)_底標':[time_low],
+        '平均觀看比例_頂標':[dur_max],'平均觀看比例_高標':[dur_high],'平均觀看比例_中位數':[dur_med],'平均觀看比例_低標':[dur_low],
+        '頻道營收(美金)_頂標':[revenue_max],'頻道營收(美金)_高標':[revenue_high],'頻道營收(美金)_中位數':[revenue_med],'頻道營收(美金)_低標':[revenue_low],
+        '不重複觀眾人數_頂標':[uv_max],'不重複觀眾人數_高標':[uv_high],'不重複觀眾人數_中位數':[uv_med],'不重複觀眾人數_低標':[uv_low],
+        '新訪客佔比_頂標':[newaud_max],'新訪客佔比_高標':[newaud_high],'新訪客佔比_中位數':[newaud_med],'新訪客佔比_低標':[newaud_low]
         }
     table_data = pd.DataFrame(table_data)
     global KPI_table
@@ -135,12 +144,12 @@ channel = ['中天電視','中天新聞','大新聞大爆卦','正常發揮','�
 
 KPI_table = {
     '頻道':[],    
-    '總觀看次數_頂標':[],'總觀看次數_高標':[],'總觀看次數_低標':[],
-    '總觀看時長(小時)_頂標':[],'總觀看時長(小時)_高標':[],'總觀看時長(小時)_底標':[],
-    '平均觀看比例_頂標':[],'平均觀看比例_高標':[],'平均觀看比例_低標':[],
-    '不重複觀眾人數_頂標':[],'不重複觀眾人數_高標':[],'不重複觀眾人數_低標':[],
-    '新訪客佔比_頂標':[],'新訪客佔比_高標':[],'新訪客佔比_低標':[],
-    '頻道營收(美金)_頂標':[],'頻道營收(美金)_高標':[],'頻道營收(美金)_低標':[]
+    '總觀看次數_頂標':[],'總觀看次數_高標':[],'總觀看次數_中位數':[],'總觀看次數_低標':[],
+    '總觀看時長(小時)_頂標':[],'總觀看時長(小時)_高標':[],'總觀看時長(小時)_中位數':[],'總觀看時長(小時)_底標':[],
+    '平均觀看比例_頂標':[],'平均觀看比例_高標':[],'平均觀看比例_中位數':[],'平均觀看比例_低標':[],
+    '頻道營收(美金)_頂標':[],'頻道營收(美金)_高標':[],'頻道營收(美金)_中位數':[],'頻道營收(美金)_低標':[],
+    '不重複觀眾人數_頂標':[],'不重複觀眾人數_高標':[],'不重複觀眾人數_中位數':[],'不重複觀眾人數_低標':[],
+    '新訪客佔比_頂標':[],'新訪客佔比_高標':[],'新訪客佔比_中位數':[],'新訪客佔比_低標':[],
     }
 KPI_table = pd.DataFrame(KPI_table)
 
